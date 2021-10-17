@@ -7,24 +7,27 @@ public class InputManager : MonoBehaviour
 {
     
     public Rigidbody sphereRb;
+    public Rigidbody carRb;
     public float fwdSpeed;
     public float revSpeed;
     public float turnSpeed;
     public float airDrag;
-    public float groundDrag;
+    private float m_groundDrag;
+    public float alignToGroundTime = 20f;
 
     [Header("STATE")]
     public bool isGrounded;
 
-    private LayerMask collisionLayer;
+    [SerializeField]private LayerMask collisionLayer;
 
     private float m_MoveInput;
     private float m_TurnInput;
 
     private void Start()
     {
-        collisionLayer = ~(1>>collisionLayer);
+        m_groundDrag = sphereRb.drag;
         sphereRb.transform.parent = null;
+        carRb.transform.parent = null;
     }
 
     private void Update()
@@ -43,22 +46,10 @@ public class InputManager : MonoBehaviour
         float newRot = m_TurnInput * Input.GetAxisRaw("Vertical") * turnSpeed * Time.deltaTime;
         transform.Rotate(new Vector3(0f,newRot,0f), Space.World);
         
-        transform.rotation = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
-        UpdateDrag();
-    }
+        Quaternion targetRot = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
+        transform.rotation =  Quaternion.Slerp(transform.rotation, targetRot, alignToGroundTime * Time.deltaTime);
 
-
-    private void UpdateDrag()
-    {
-        if (isGrounded)
-        {
-            sphereRb.drag = groundDrag;
-        }
-        else
-        {
-            sphereRb.drag = airDrag;
-            sphereRb.AddForce(transform.up * -9.8f, ForceMode.Acceleration);
-        }
+        sphereRb.drag = isGrounded? m_groundDrag: airDrag;
     }
 
     private void FixedUpdate()
@@ -67,6 +58,12 @@ public class InputManager : MonoBehaviour
         {
             sphereRb.AddForce(transform.forward * m_MoveInput, ForceMode.Acceleration);
         }
+        else
+        {
+            sphereRb.AddForce(transform.up * -9.8f, ForceMode.Acceleration);
+        }
+
+        carRb.MoveRotation(transform.rotation);
     }
 
 
