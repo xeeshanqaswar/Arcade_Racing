@@ -9,6 +9,7 @@ public class WheelController : MonoBehaviour
     public Transform[] wheels;
     public Transform[] turnWheels;
     public TrailRenderer[] trails;
+    public ParticleSystem[] smokeParticles;
 
 
     private float m_MoveInput;
@@ -44,8 +45,29 @@ public class WheelController : MonoBehaviour
 
         foreach (var trail in trails)
         {
-            trail.emitting = (m_MoveInput!= 0);
-        }     
+            trail.emitting = (m_MoveInput > 0) && (m_TurnInput != 0);
+        }   
+
+        if (m_TurnInput != 0 && m_MoveInput > 0)
+        {
+            foreach (var smoke in smokeParticles)
+            {
+                if (!smoke.isEmitting )
+                {
+                    smoke.Play();
+                }
+            } 
+        }
+        else
+        {
+            foreach (var smoke in smokeParticles)
+            {
+                if (smoke.isEmitting )
+                {
+                    smoke.Stop();
+                }
+            } 
+        }
 
     }
 
