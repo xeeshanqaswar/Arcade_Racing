@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,7 +9,7 @@ public class VehicleSFX : MonoBehaviour
     public AudioSource engineSound, slipSound;
     
     
-    private float m_MoveInput;
+    [SerializeField] private float m_MoveInput;
     [SerializeField] private float m_TurnInput;
 
     private void Update()
@@ -29,5 +30,7 @@ public class VehicleSFX : MonoBehaviour
         {
             slipSound.volume = Mathf.MoveTowards(slipSound.volume, 0f, Time.deltaTime * 2f);
         }
+
+        engineSound.pitch = Mathf.Lerp(0.8f,2.7f,Math.Abs(m_MoveInput));
     }
 }
